@@ -295,4 +295,24 @@ select branchid, count(*) total_ac from accounts group by branchid order by tota
 -- branch with most customers 
 select branchid, count(customerid) as Total_customers from accounts group by branchid order by Total_customers desc limit 1;
 
+
+use banking_system;
 -- which branch has the highest totla account balance?
+select branchid, sum(balance) total_acc_balance from accounts group by Branchid order by Total_acc_balance desc limit 1 ;
+
+--  which  branch handles the most transactions
+
+-- Account with max transactions?
+
+select accountid, count(*) total_transactions from transactions group by accountid order by total_transactions desc limit 1 ;
+
+-- branch with max transactions?
+select branchid from accounts where accountid = 1003;
+
+-- -----------------------Joins 
+select branchname, count(transactionid) as total_transactions from accounts as a join branches as b on 
+a.branchid = b.branchid join transactions t on a.accountid = t.accountid
+ group by branchname order by total_transactions desc limit 1 ;
+ 
+ 
+
