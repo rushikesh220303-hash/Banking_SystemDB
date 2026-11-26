@@ -314,5 +314,231 @@ select branchname, count(transactionid) as total_transactions from accounts as a
 a.branchid = b.branchid join transactions t on a.accountid = t.accountid
  group by branchname order by total_transactions desc limit 1 ;
  
+ -- customer with max loan amount
+ select customerid, sum(loanamount) total_loan_amount from loans group by customerid order by total_loan_amount desc limit 1;
  
+ -- Branch with max loan amount 
+ 
+ 
+ use banking_system;
+ 
+ select branchid from accounts where customerid = 104;
+ 
+ 
+ 
+ -- Functiosn
+ 
+ -- String Function
+--  CONCAT() combines multiple strings
+
+select customerid, concat(firstname, " ", lastname) as full_name from customers;
+
+-- Upper 
+-- it converts the cases into upper cases
+
+select customerid, upper(concat(firstname," ", lastname)) as Full_name from customers;
+
+-- lower
+select customerid, lower(concat(firstname," ",Lastname)) as full_name from customers;
+
+-- length()
+-- finds the number of length
+select firstname, length(firstname) as namelength from customers having namelength <= 5 
+order by namelength desc limit 1 offset 1;
+
+-- offset is used to skip the value
+
+-- char length
+-- calculates the number of strings
+
+select firstname, char_length(firstname) as character_length from customers ;
+
+-- Left()
+-- extract data from the left side 
+select firstname, left(firstname ,3)as first_3_char from customers;
+
+-- right()
+select phone, right(phone,4) as last4digits from customers;
+
+-- Display masked accounts
+select customerid, concat("XXXXXX",right(phone,4)) as masket_phone from customers;
+
+-- substring()
+-- it extracts the portion of a string
+
+select email, substring(email,1,5)as email_part from customers;
+
+-- substring_index()
+select email, substring_index(email,"@",1) as email_part from customers;
+
+-- trim 
+-- removes useless spaces
+
+select trim("Veena Kutty     ") as Name;
+
+-- Replace ()
+-- replace values
+select email, replace(email,"gmail","email") as Emails from customers;
+
+-- locate()
+-- finds the positons of the character/ string
+
+select email, locate("@",email) as position from customers;
+
+-- Math Functions
+
+-- Round()
+-- round off the decimal calues
+select accountid, balance, round(balance,0) as rounede_balance from accounts;
+
+-- ceil/ceiling()
+-- it rounds up the value
+
+select accountid, balance, ceil(balance)as roundup from accounts;
+
+-- floot()
+-- it rounds doen the value
+
+select balance, floor(balance) as rounddown from accounts; 
+
+-- ABD
+-- returns the absolute value
+
+select abs(-5465) as absolute_value;
+
+-- mod()
+-- returns remailiing value
+
+select accountid, mod(accountid,2) as reminder from accounts;
+
+-- case then end id just like if_ else statement
+
+select accountid, mod(accountid,2) as reminder, 
+case when mod(accountid,2)=0 then "Even"
+else "Odd"
+end as ID_TYPE
+from accounts;
+
+-- power()
+-- works like indices 
+
+select power(2,4) as result;
+
+-- sqrt()
+-- returns the square root of the value
+
+select balance, sqrt(balance) as sqrt_balance from accounts;
+
+-- greatest()
+-- compares values
+
+select accountid, balance, greatest(balance,25000) as minimum_balance from Accounts;
+
+-- least()
+-- compares values
+
+select accountid, balance, least(balance,50000) as max_limit from accounts;
+
+-- calculate annual interest
+
+select loanid, loanamount, intrestrate, round(loanamount * intrestrate / 100,2) as annual_interest from loans;
+
+-- loan amount + intrest
+select loanid, loanamount, intrestrate, round(loanamount + (loanamount * intrestrate /100),2) as 
+principal_plus_1year_intrest from loans;
+
+-- balance category
+
+select accountid, balance, case 
+when balance is null then "Unkonwn"
+when balance < 10000 then "Low"
+when balance < 50000 then "medium"
+else "High"
+end as balance_category from accounts;
+
+-- date and time functions
+
+select curdate() as today;  -- today's date
+select sysdate() as today; -- today's date with time
+
+-- Year()
+select customerid, birthdate, year(birthdate) as birth_year from customers;
+
+-- months()
+select customerid, birthdate, month(birthdate) as birth_month from customers;
+
+select customerid, birthdate, monthname(birthdate) as birth_month from customers;
+
+select transactionid, transactiondate, monthname(transactiondate) as transcation_month from transactions;
+
+-- day()
+select transactionid, transactiondate, day(transactiondate) as day_ from transactions;
+
+-- dayname()
+select transactionid, transactiondate, dayname(transactiondate) as day_name from transactions;
+
+-- quarter()
+select transactionid, transactiondate, quarter(transactiondate) as quarter_ from transactions;
+
+-- which quarter has most transactions 
+select quarter(transactiondate) as quarters, count(*) as transaction_count, sum(amount) as total_amount from transactions
+where transactiondate is not null 
+group by quarter(transactiondate);
+
+-- datediff()
+
+select loanid, startdate, enddate, datediff(enddate,startdate) as loan_days from loans;
+
+-- calculate loan duration in years
+
+select loanid, startdate, enddate, round(datediff(enddate,startdate)/365,2) as loan_years from loans 
+where enddate is not null;
+
+-- timestamdiff()
+select customerid, firstname, birthdate, timestampdiff(year,birthdate,curdate()) as age from customers;
+
+-- age group
+
+select customerid, firstname, birthdate, timestampdiff(year,birthdate,curdate()) as age,
+case
+when timestampdiff(year,birthdate,curdate())<25 then "Young Adult"
+when timestampdiff(year,birthdate,curdate()) between 25 and 40 then "Adult"
+else "Senior"
+end as age_grp from customers;
+
+-- date_format()
+
+select transactiondate, date_format(transactiondate,'%d-%m-%y') as formated_date from transactions;
+
+select transactiondate, date_format(transactiondate,'%M-%Y') as month__year from transactions;
+
+-- Monthly transactions 
+select 
+date_format(transactiondate,'%Y-%m')as month,
+count(*) as transaction_counts,
+sum(amount) as total_amount
+from transactions 
+where transactiondate is not null 
+group by date_format(transactiondate,'%Y-%m')
+order by month;
+
+-- last 30 dyas transactions            --- date_sub substract the date
+select * 
+from transactions
+where  transactiondate >= date_sub('2026-02-25',interval 10 DAY);
+
+-- adding days to the date
+select transactionid, transactiondate, date_add(transactiondate,interval 30 day) as after_30_days
+from transactions;
+
+-- loan status using days
+
+select loanid, startdate, enddate,
+case 
+when enddate is null then "No End Date"
+when enddate < curdate() then "Completed"
+else "Active"
+end as Loan_staatus
+from loans;
+
 
