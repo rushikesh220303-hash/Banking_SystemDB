@@ -541,4 +541,130 @@ else "Active"
 end as Loan_staatus
 from loans;
 
+use banking_system;
 
+-- Windows functions
+-- rank() Dense Rank() Over()
+
+select loanid,loanamount, rank() over ( order by loanamount desc) as loan_rank
+from loans;
+
+select transactionid , amount, rank() over(order by amount desc )as transaction_rank,
+dense_rank() over(order by amount desc) as transaction_dense_rank
+from transactions;
+
+select transactionid, transactiontype, amount,
+dense_rank() OVER(partition by transactiontype order by amount desc) as transaction_rank
+from transactions;
+
+-- row number()
+
+select loanid, customerid, loanamount, 
+row_number() over(order by loanamount desc) as rownumber
+from loans;
+
+select loanid,customerid, loanamount,
+row_number() over(partition by customerid order by loanamount desc) as RN from loans;
+
+-- sum()
+
+select loanid, customerid, loanamount, 
+sum(loanamount) over (order by loanamount desc) as runing_total
+from loans;
+
+select loanid, customerid, loanamount,
+sum(loanamount) over(partition by customerid order by loanamount desc) as running_total
+from loans;
+
+-- Lag()
+
+select loanid, customerid, loanamount,
+lag(loanamount) over(order by loanamount desc) as perviousloanamount
+from loans;
+
+-- lead()
+select loanid, customerid,loanamount,
+lead(loanamount) over(order by loanamount desc) as next_amount
+from loans;
+
+-- joins
+
+-- inner join 
+select * from customers;
+select * from accounts;
+
+select customers.customerid, firstname,accounttype,balance from customers  
+join accounts on
+customers.customerid = accounts.customerid;
+
+select c.customerid, c.firstname, count(a.accountid) as total_accounts
+from customers c 
+join  accounts a 
+on c.customerid= a.customerid
+group by c.customerid;
+
+-- left joins
+
+select branchname, count(accountid) as total_accounts
+from accounts 
+left join branches
+on branches.branchid = accounts.branchid
+group by branchname;
+
+select branchname, count(accountid) total_acc
+from branches 
+left join accounts
+on branches.branchid = accounts.branchid
+group by branchname;
+
+-- right join
+
+select branchname, count(accountid)as total_accounts
+from branches
+right join accounts
+on branches.branchid= accounts.branchid
+group by branchname;
+
+select branchname, count(accountid) as _total
+from accounts 
+right join branches
+on branches.branchid = accounts.branchid
+group by branchname;
+
+-- which branch has most customers/accounts?
+select * from customers;
+select * from accounts;
+select * from branches;
+select b.branchid, b.branchname, count(accountid) as total_acc
+from branches b join accounts a on
+b.branchid = a.branchid
+join customers c
+on c.customerid = a.customerid
+group by b.branchid
+order by total_acc desc limit 1;
+
+-- which branch has the highest loan exposure?
+select * from loans;
+select b.branchid, b.branchname, sum(loanamount) as total_loan_amount from branches b join accounts a
+on b.branchid= a.branchid
+join customers as c 
+on a.customerid = c.customerid
+join loans l 
+on l.customerid = c.customerid
+group by b.branchid
+order by total_loan_amount desc limit 1 ;
+
+
+-- Distinct
+
+select * from accounts;
+select count(distinct accounttype) as total_account_type
+from accounts;
+
+-- LIke
+select * from customers where firstname like "A%";
+
+select * from customers where firstname like "a%";
+select * from customers where firstname like "_a%";
+select * from customers where firstname like "%EE%";
+select * from customers where firstname like "%a_";
